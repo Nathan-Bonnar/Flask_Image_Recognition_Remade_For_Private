@@ -86,8 +86,7 @@ def test_predict_sad_path_invalid_image(client, monkeypatch):
 
     # Send a bad "image" (just plain text bytes)
     bad_bytes = b"not-an-image"
-    data = {"file": (io.BytesIO(bad_bytes), "hand.png")}
-    res = client.post("/prediction", data=data, content_type="multipart/form-data")
+    res = _post_image(client, bad_bytes)
 
     # The app catches the error and renders an error page
     assert res.status_code == 200  # Flask still returns 200 for error template
