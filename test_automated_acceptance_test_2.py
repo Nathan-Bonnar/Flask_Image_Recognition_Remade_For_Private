@@ -15,35 +15,30 @@
 
 #expected result
 #Response is given with proper output for the image that was given. IE if user submitted an image with a 4, 4 is the output
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-import re
-import subprocess
 import os
 import time
-import pytest
-import tempfile
 
 
 def test_Automated_Acceptance_Test_Two():
-   
+
     driver = setup()
 
     file_input = driver.find_element(By.ID, "upload")
 
-    image_path = os.path.abspath(r"test_images/4/Sign 4 (37).jpeg") 
+    image_path = os.path.abspath(r"test_images/4/Sign 4 (37).jpeg")
 
     file_input.send_keys(image_path)
 
     time.sleep(2)
 
     submit_button = driver.find_element(By.CSS_SELECTOR, "input[type='submit']")
-    
     submit_button.click()
 
     wait = WebDriverWait(driver, 10)
@@ -57,15 +52,19 @@ def test_Automated_Acceptance_Test_Two():
     prediction_text = prediction_element.text
     assert prediction_text == "4", f"Expected prediction '4', but got '{prediction_text}'"
 
+    driver.quit()
+
 
 def setup():
-    firefox_options = Options()
-    firefox_options.add_argument("--headless")  # Run in headless mode
-    firefox_options.add_argument("--window-size=1920,1080")
-    
-    driver = webdriver.Firefox(options=firefox_options)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
+
+    # GitHub Actions installs chromedriver at /usr/bin/chromedriver
+    service = Service("/usr/bin/chromedriver")
+
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.get("http://127.0.0.1:9000/")
     return driver
-
-def teardown(driver):
-    driver.quit()
