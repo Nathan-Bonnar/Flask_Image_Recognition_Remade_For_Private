@@ -10,7 +10,8 @@ jobs:
         python-version: ["3.10"]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,23 +22,37 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 \
-              fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0
+          fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0 \
+          curl
+
+      - name: Install Google Chrome
+        run: |
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
           sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          echo "Chrome version: $CHROME_VERSION"
+          wget -N https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/
+
       - name: Install Python dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install coverage pytest selenium
+          pip install selenium webdriver-manager coverage ruff
 
       - name: Start Flask app
         run: |
           export FLASK_APP=app.py
           nohup python -m flask run --host=127.0.0.1 --port=9000 &
 
-      - name: Wait for Flask
+      - name: Wait for Flask to start
         run: |
           for i in {1..10}; do
             curl -s http://127.0.0.1:9000/ && break
@@ -45,11 +60,8 @@ jobs:
           done
 
       - name: Lint with Ruff
-        run: |
-          pip install ruff
-          ruff check .
+        run: ruff check .
         continue-on-error: true
 
-      - name: Test with pytest
-        run: |
-          coverage run -m pytest -v -s
+      - name: Run tests with coverage
+        run: coverage run -m pytest -v -s
