@@ -21,6 +21,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
+        architecture: x64
 
     - name: Install dependencies
       run: |
@@ -32,20 +33,19 @@ jobs:
       run: |
         mkdir -p /opt/google/chrome
         wget -qO chrome-linux64.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chrome-linux64.zip
-        unzip chrome-linux64.zip -d /opt/google/chrome
-        sudo chmod +x /opt/google/chrome/chrome-linux64/chrome
-        sudo ln -sf /opt/google/chrome/chrome-linux64/chrome /usr/bin/google-chrome
-        /usr/bin/google-chrome --version
+        unzip -q chrome-linux64.zip -d /opt/google/chrome
+        chmod +x /opt/google/chrome/chrome-linux64/chrome
+        /opt/google/chrome/chrome-linux64/chrome --version
 
     - name: Install ChromeDriver
       run: |
-        CHROME_PATH=/usr/bin/google-chrome
-        CHROME_VERSION=$($CHROME_PATH --version | awk '{print $3}')
+        CHROME_BIN=/opt/google/chrome/chrome-linux64/chrome
+        CHROME_VERSION=$($CHROME_BIN --no-sandbox --version | awk '{print $3}')
         CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
         echo "Chrome major version: $CHROME_MAJOR"
         DRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR")
         wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-        unzip chromedriver_linux64.zip
+        unzip -q chromedriver_linux64.zip
         sudo mv chromedriver /usr/bin/chromedriver
         sudo chmod +x /usr/bin/chromedriver
         /usr/bin/chromedriver --version
