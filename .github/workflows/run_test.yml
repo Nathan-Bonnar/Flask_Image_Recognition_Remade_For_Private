@@ -20,46 +20,35 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 google-chrome-stable
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-          wget unzip xvfb libxi6 libnss3 libxss1 \
+          sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 \
           fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0
+
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-
-
-      - name: Install Google Chrome
+      - name: Install Python dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          pip install -r requirements.txt
 
       - name: Start Flask app
         run: |
-          export FLASK_APP=app.py
-          nohup flask run --host=127.0.0.1 --port=9000 &
+          nohup FLASK_APP=app.py python -m flask run --host=127.0.0.1 --port=9000 &
 
       - name: Wait for Flask
         run: |
-          for i in {1..10}; do
-            curl -s http://127.0.0.1:9000/ && break
+          for i in {1..15}; do
+            curl -s http://127.0.0.1:9000/ && break || true
             sleep 2
           done
-          
+
       - name: Lint with Ruff
         run: |
           pip install ruff
           ruff check .
         continue-on-error: true
-        
-      - name: Test with pytest
+
+      - name: Run tests
         run: |
-          coverage run -m pytest  -v -s
+          coverage run -m pytest -v -s
