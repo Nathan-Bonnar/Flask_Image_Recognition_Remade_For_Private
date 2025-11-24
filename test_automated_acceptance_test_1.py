@@ -55,27 +55,16 @@ def test_Automated_Acceptance_Test_One():
 
 
 def setup():
-    service = Service("/usr/local/bin/chromedriver")
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--disable-extensions')
-    options.add_argument('--start-maximized')
-# Memory optimization
-    options.add_argument('--disk-cache-size=1')
-    options.add_argument('--media-cache-size=1')
-    options.add_argument('--remote-debugging-port=9222')
-    options.add_argument(f'--user-data-dir={tempfile.mkdtemp()}') 
-   
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
-
+    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
-    
     driver.get("http://127.0.0.1:9000/")
-    
+
     return driver
 
 def teardown(driver):
