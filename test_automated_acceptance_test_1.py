@@ -24,6 +24,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import tempfile
 import subprocess
 import os
 import time
@@ -64,9 +65,8 @@ def setup():
 # Memory optimization
     options.add_argument('--disk-cache-size=1')
     options.add_argument('--media-cache-size=1')
-    options.add_argument('--incognito')
     options.add_argument('--remote-debugging-port=9222')
-    options.add_argument('--aggressive-cache-discard')
+    options.add_argument(f'--user-data-dir={tempfile.mkdtemp()}') 
    
     service = Service(ChromeDriverManager().install())
 
