@@ -24,6 +24,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import subprocess
 import os
 import time
 import pytest
@@ -52,7 +53,6 @@ def test_Automated_Acceptance_Test_One():
 
 
 
-
 def setup():
     chrome_options = Options()
     chrome_options.add_argument("--headless=new")
@@ -60,12 +60,13 @@ def setup():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--remote-debugging-port=9222")
+
+    chrome_version = subprocess.getoutput("google-chrome --version | grep -oP '\\d+' | head -1")
    
-    driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()), options=chrome_options
-)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager(version=chrome_version).install()),options=chrome_options)
+    
     driver.get("http://127.0.0.1:9000/")
+    
     return driver
 
 def teardown(driver):
