@@ -1,6 +1,6 @@
-name: Run Unit Test via Pytest
+name: Run Automated Tests via Pytest
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -11,21 +11,43 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -U Flask
-          pip install coverage
+          pip install -U Flask coverage selenium webdriver-manager
+
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+
+      - name: Start Flask app
+        run: |
+          export FLASK_APP=app.py
+          nohup flask run --host=127.0.0.1 --port=9000 &
+
+      - name: Wait for Flask
+        run: |
+          for i in {1..10}; do
+            curl -s http://127.0.0.1:9000/ && break
+            sleep 2
+          done
+          
       - name: Lint with Ruff
         run: |
           pip install ruff
           ruff --format=github --target-version=py310 .
         continue-on-error: true
-      - name: Test with pytest
+        
+      - name: Run Selenium Tests
         run: |
-          coverage run -m pytest  -v -s
+          coverage run -m pytest -v -s tests/
