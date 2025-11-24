@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10.15'
+        python-version: "3.10"
         architecture: x64
 
     - name: Install dependencies
@@ -39,8 +39,9 @@ jobs:
 
     - name: Install ChromeDriver
       run: |
-        CHROME_PATH=$(google-chrome --version | awk '{print $3}')
-        CHROME_MAJOR=$(echo $CHROME_PATH | cut -d. -f1)
+        # Extract major version number
+        CHROME_MAJOR=$(google-chrome --version | grep -oP '\d+' | head -1)
+        # Get matching chromedriver version
         DRIVER_VERSION=$(curl -sS "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR")
         wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
         unzip chromedriver_linux64.zip
