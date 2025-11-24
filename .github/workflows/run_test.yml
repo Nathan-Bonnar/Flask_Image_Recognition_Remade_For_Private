@@ -25,23 +25,27 @@ jobs:
           fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0 \
           curl
 
-      - name: Install Chrome
+      - name: Install Chrome for Testing
         run: |
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
-          sudo apt-get update
-          sudo apt-get -y install google-chrome-stable=118.0.5993.118-1
+          CHROME_VERSION="142.0.7444.175"
+          wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROME_VERSION/linux64/chrome-linux64.zip"
+          unzip chrome-linux64.zip
+          sudo mv chrome-linux64 /opt/google/chrome
+          sudo ln -s /opt/google/chrome/chrome /usr/bin/google-chrome
 
-
-      - name: Install ChromeDriver
-        run: pip install webdriver-manager selenium
-
+      - name: Install ChromeDriver for Testing
+        run: |
+          CHROMEDRIVER_VERSION="142.0.7444.175"
+          wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+          unzip chromedriver-linux64.zip
+          chmod +x chromedriver-linux64/chromedriver
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install selenium webdriver-manager coverage ruff
+          pip install selenium webdriver-manager coverage ruff flask
 
       - name: Start Flask app
         run: |
