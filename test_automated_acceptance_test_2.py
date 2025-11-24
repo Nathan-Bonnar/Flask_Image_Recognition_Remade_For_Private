@@ -56,7 +56,7 @@ def test_Automated_Acceptance_Test_Two():
 
 
 
-def driver():
+def setup():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
