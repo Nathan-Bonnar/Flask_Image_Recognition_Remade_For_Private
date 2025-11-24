@@ -20,6 +20,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 import os
 import time
 import pytest
@@ -40,7 +41,7 @@ def test_Automated_Acceptance_Test_Two():
     submit_button.click()
 
     wait = WebDriverWait(driver, 10)
-    
+
     prediction_element = wait.until(
         EC.presence_of_element_located(
             (By.CSS_SELECTOR, "h2.display-4.text-dark.font-weight-bold")
@@ -55,10 +56,16 @@ def test_Automated_Acceptance_Test_Two():
 
 
 
-def setup():
-    driver = webdriver.Chrome()
+def driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080") 
+
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get("http://127.0.0.1:9000/")
-    return driver   
+    return driver
 
 def teardown(driver):
     driver.quit()

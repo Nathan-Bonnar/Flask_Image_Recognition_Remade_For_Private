@@ -17,7 +17,7 @@
 
 #Expected Results
 # The website will recive the image, and display it back to the user, showing them what they have uploaded to be assessed
-
+from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import os
@@ -48,10 +48,16 @@ def test_Automated_Acceptance_Test_One():
 
 
 
-def setup():
-    driver = webdriver.Chrome()
+def driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
+
+    driver = webdriver.Chrome(options=chrome_options)
     driver.get("http://127.0.0.1:9000/")
-    return driver   
+    return driver
 
 def teardown(driver):
     driver.quit()
