@@ -34,7 +34,7 @@ jobs:
         mkdir -p /opt/google/chrome
         wget -qO chrome-linux64.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chrome-linux64.zip
         unzip chrome-linux64.zip -d /opt/google/chrome
-        sudo ln -sf /opt/google/chrome/chrome/chrome /usr/bin/google-chrome
+        sudo ln -sf /opt/google/chrome/chrome-linux64/chrome /usr/bin/google-chrome
         google-chrome --version
 
     - name: Install ChromeDriver
