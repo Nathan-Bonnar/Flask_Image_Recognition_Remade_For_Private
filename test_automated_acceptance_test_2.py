@@ -60,13 +60,12 @@ def test_Automated_Acceptance_Test_Two():
 
 def setup():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
+    options.add_argument("--headless=new")  # required for GitHub Actions
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-
+    driver = webdriver.Chrome(options=options)  # Selenium Manager handles version
+    
     driver.get("http://127.0.0.1:9000/")
 
     return driver
