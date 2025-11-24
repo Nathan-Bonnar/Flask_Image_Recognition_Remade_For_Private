@@ -1,67 +1,41 @@
-name: Run Automated Tests via Pytest
+name: Python CI with Chrome for Testing
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
+
+    env:
+      CHROME_VERSION: "142.0.7444.175"
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 \
-          fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0 \
-          curl
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install selenium webdriver-manager pytest coverage
 
-      - name: Install Chrome for Testing
-        run: |
-          CHROME_VERSION="142.0.7444.175"
-          wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROME_VERSION/linux64/chrome-linux64.zip"
-          unzip chrome-linux64.zip
-          sudo mv chrome-linux64 /opt/google/chrome
-          sudo ln -s /opt/google/chrome/chrome /usr/bin/google-chrome
+    - name: Download Chrome for Testing
+      run: |
+        mkdir -p /opt/google/chrome
+        wget -qO chrome-linux64.zip https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chrome-linux64.zip
+        unzip chrome-linux64.zip -d /opt/google/chrome
+        sudo ln -sf /opt/google/chrome/chrome/chrome /usr/bin/google-chrome
+        google-chrome --version
 
-      - name: Install ChromeDriver for Testing
-        run: |
-          CHROMEDRIVER_VERSION="142.0.7444.175"
-          wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
-          unzip chromedriver-linux64.zip
-          chmod +x chromedriver-linux64/chromedriver
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install selenium webdriver-manager coverage ruff flask
-
-      - name: Start Flask app
-        run: |
-          export FLASK_APP=app.py
-          nohup python -m flask run --host=127.0.0.1 --port=9000 &
-
-      - name: Wait for Flask to start
-        run: |
-          for i in {1..10}; do
-            curl -s http://127.0.0.1:9000/ && break
-            sleep 2
-          done
-
-      - name: Lint with Ruff
-        run: ruff check .
-        continue-on-error: true
-
-      - name: Run tests with coverage
-        run: coverage run -m pytest -v -s
+    - name: Run tests with coverage
+      run: |
+        coverage run -m pytest -v -s
+        coverage report
