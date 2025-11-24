@@ -55,6 +55,7 @@ def test_Automated_Acceptance_Test_One():
 
 
 def setup():
+    service = Service("/usr/local/bin/chromedriver")
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -68,10 +69,10 @@ def setup():
     options.add_argument('--remote-debugging-port=9222')
     options.add_argument(f'--user-data-dir={tempfile.mkdtemp()}') 
    
-    service = Service(ChromeDriverManager().install())
 
-   
+
     driver = webdriver.Chrome(service=service, options=options)
+
     
     driver.get("http://127.0.0.1:9000/")
     

@@ -28,10 +28,10 @@ jobs:
       - name: Install Chrome
         run: |
           wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo mkdir -p /etc/apt/sources.list.d
-          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
           sudo apt-get update
-          sudo apt-get -y install google-chrome-stable
+          sudo apt-get -y install google-chrome-stable=118.0.5993.118-1
+
 
       - name: Install ChromeDriver
         run: pip install webdriver-manager selenium
