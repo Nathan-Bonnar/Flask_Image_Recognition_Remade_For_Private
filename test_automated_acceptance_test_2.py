@@ -26,6 +26,7 @@ import os
 import time
 import pytest
 
+
 def test_Automated_Acceptance_Test_Two():
    
     driver = setup()
@@ -67,9 +68,8 @@ def setup():
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--remote-debugging-port=9222")
    
-    driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()), options=chrome_options
-)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    
     driver.get("http://127.0.0.1:9000/")
     return driver
 
