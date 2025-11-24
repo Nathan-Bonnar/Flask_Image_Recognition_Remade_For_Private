@@ -59,11 +59,12 @@ def test_Automated_Acceptance_Test_Two():
 
 
 def setup():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=chrome_options)
+    firefox_options = Options()
+    firefox_options.add_argument("--headless")  # Run in headless mode
+    firefox_options.add_argument("--window-size=1920,1080")
+    
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.get("http://127.0.0.1:9000/")
     return driver
 
 def teardown(driver):

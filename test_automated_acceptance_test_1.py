@@ -24,6 +24,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.options import Options
+
+
 import tempfile
 import subprocess
 import os
@@ -55,11 +58,12 @@ def test_Automated_Acceptance_Test_One():
 
 
 def setup():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(options=chrome_options)
+    firefox_options = Options()
+    firefox_options.add_argument("--headless")  # Run in headless mode
+    firefox_options.add_argument("--window-size=1920,1080")
+    
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.get("http://127.0.0.1:9000/")
     return driver
 
 def teardown(driver):

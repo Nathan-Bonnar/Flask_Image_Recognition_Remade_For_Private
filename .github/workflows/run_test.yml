@@ -1,46 +1,60 @@
-name: Python CI with Chrome for Testing
+name: Flask CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox
 
-    - name: Start Flask app
-      run: |
-        export FLASK_APP=app.py
-        export FLASK_RUN_PORT=9000
-        export FLASK_ENV=testing
-        # Start Flask in background
-        nohup flask run --host=127.0.0.1 --port=9000 > flask.log 2>&1 &
-        sleep 5  # wait a few seconds for the server to start
+      - name: Install geckodriver
+        uses: mozilla/geckodriver-action@v2
 
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install selenium webdriver-manager pytest coverage
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install selenium coverage pytest
 
-    - name: Check Chrome & ChromeDriver versions
-      run: |
-        google-chrome --version
-        chromedriver --version
+      - name: Start Flask app
+        run: |
+          export FLASK_APP=app.py
+          export FLASK_ENV=development
+          nohup flask run --host=0.0.0.0 --port=9000 &
 
-    - name: Run tests with coverage
-      run: |
-        coverage run -m pytest -v -s
-        coverage report
+      - name: Wait for Flask to start
+        run: |
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:9000 > /dev/null; then
+              echo "Flask started!"
+              break
+            fi
+            echo "Waiting for Flask..."
+            sleep 2
+          done
+
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest -v -s
+          coverage report
+          coverage xml
