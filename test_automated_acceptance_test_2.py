@@ -27,6 +27,7 @@ import time
 import pytest
 
 def test_Automated_Acceptance_Test_Two():
+   
     driver = setup()
 
     file_input = driver.find_element(By.ID, "upload")
@@ -64,6 +65,7 @@ def setup():
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
+   
     driver = webdriver.Chrome(
     service=Service(ChromeDriverManager().install()), options=chrome_options
 )
