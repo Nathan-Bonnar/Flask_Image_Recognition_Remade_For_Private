@@ -65,7 +65,7 @@ jobs:
 
   test-happysad:
     runs-on: ubuntu-latest
-
+    needs: test-unit
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -121,7 +121,7 @@ jobs:
   
   test-accept:
     runs-on: ubuntu-latest
-
+    needs: test-happysad
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
