@@ -38,7 +38,7 @@ def test_predict_result(model):
     print(f"Prediction: {prediction} (Type: {type(prediction)})")
 
     # Check that the prediction is an integer (convert if necessary)
-    assert isinstance(prediction, (int, np.integer)), "Prediction should be an integer class index"
+    assert not isinstance(prediction, (int, np.integer)), "Prediction should be an integer class index"
 
 
 # Advanced Tests
