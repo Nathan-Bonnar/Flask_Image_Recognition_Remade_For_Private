@@ -119,7 +119,7 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 &
           pytest -v -s ./test/happysad
   
-  test-unit:
+  test-accept:
     runs-on: ubuntu-latest
 
     steps:
