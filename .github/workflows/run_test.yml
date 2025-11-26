@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  test-unit:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,9 +56,121 @@ jobs:
             sleep 2
           done
 
-      - name: Run Selenium tests (headless Firefox)
+      - name: Run Unit tests
         env:
           DISPLAY: :99
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
-          pytest -v -s
+          pytest -v -s ./test/unit
+
+  test-happysad:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Verify Firefox is installed
+        run: firefox --version
+
+      - name: Install Geckodriver (latest)
+        run: |
+          GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest \
+            | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Installing Geckodriver $GECKO_VERSION"
+          curl -L -o geckodriver.tar.gz \
+            https://github.com/mozilla/geckodriver/releases/download/$GECKO_VERSION/geckodriver-$GECKO_VERSION-linux64.tar.gz
+          tar -xzf geckodriver.tar.gz
+          sudo mv geckodriver /usr/local/bin/
+          geckodriver --version
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install selenium pytest
+
+      - name: Start Flask server
+        run: |
+          export FLASK_APP=app.py
+          nohup flask run --host=127.0.0.1 --port=9000 &
+          sleep 5
+
+      - name: Wait for Flask to be available
+        run: |
+          for i in {1..15}; do
+            if curl -s http://127.0.0.1:9000 > /dev/null; then
+              echo "Flask is running"
+              break
+            fi
+            echo "Waiting for Flask..."
+            sleep 2
+          done
+
+      - name: Run Happy/Sad tests
+        env:
+          DISPLAY: :99
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 &
+          pytest -v -s ./test/happysad
+  
+  test-unit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Verify Firefox is installed
+        run: firefox --version
+
+      - name: Install Geckodriver (latest)
+        run: |
+          GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest \
+            | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Installing Geckodriver $GECKO_VERSION"
+          curl -L -o geckodriver.tar.gz \
+            https://github.com/mozilla/geckodriver/releases/download/$GECKO_VERSION/geckodriver-$GECKO_VERSION-linux64.tar.gz
+          tar -xzf geckodriver.tar.gz
+          sudo mv geckodriver /usr/local/bin/
+          geckodriver --version
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install selenium pytest
+
+      - name: Start Flask server
+        run: |
+          export FLASK_APP=app.py
+          nohup flask run --host=127.0.0.1 --port=9000 &
+          sleep 5
+
+      - name: Wait for Flask to be available
+        run: |
+          for i in {1..15}; do
+            if curl -s http://127.0.0.1:9000 > /dev/null; then
+              echo "Flask is running"
+              break
+            fi
+            echo "Waiting for Flask..."
+            sleep 2
+          done
+
+      - name: Run Acceptance tests
+        env:
+          DISPLAY: :99
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 &
+          pytest -v -s ./test/acceptance
